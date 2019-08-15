@@ -3,15 +3,15 @@
   "version": "1.0.2",
   "description": "Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.",
   "homepage": "https://www.phoenixreisen.com",
-  "main": "gateway.js",
+  "main": "./src/gateway.js",
   "scripts": {
-    "minify": "npx uglifyjs gateway.min.js -o gateway.min.js",
-    "compile": "npx babel gateway.js --presets @babel/preset-env -o gateway.min.js",
+    "minify": "npx uglifyjs ./src/gateway.min.js -o ./src/gateway.min.js",
+    "compile": "npx babel ./src/gateway.js --presets @babel/preset-env -o ./src/gateway.min.js",
     "prepublish": "npm run compile && npm run minify"
   },
   "repository": {
     "type": "hg",
-    "url": "https://bitbucket.org/phoenixreisen/component-gateway/src/default/"
+    "url": "ssh://hg@bitbucket.org/phoenixreisen/gateway"
   },
   "keywords": [
     "api",
