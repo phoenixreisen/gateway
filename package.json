@@ -1,6 +1,6 @@
 {
   "name": "@phoenixreisen/gateway",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.",
   "homepage": "https://www.phoenixreisen.com",
   "main": "./src/gateway.js",
