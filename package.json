@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "hg",
-    "url": "ssh://hg@bitbucket.org/phoenixreisen/gateway"
+    "url": "https://github.com/phoenixreisen/gateway"
   },
   "keywords": [
     "api",
