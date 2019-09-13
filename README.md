@@ -19,7 +19,7 @@ const Gateway = require('@phoenixreisen/gateway');
 
 // oder
 
-import Gateway from '@phoenixreisen/gateway');
+import Gateway from '@phoenixreisen/gateway';
 ```
 
 An zentraler Stelle API- & Error-Url setzen
