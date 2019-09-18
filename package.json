@@ -10,7 +10,7 @@
     "prepublish": "npm run compile && npm run minify"
   },
   "repository": {
-    "type": "hg",
+    "type": "git",
     "url": "https://github.com/phoenixreisen/gateway"
   },
   "keywords": [
