@@ -2,7 +2,7 @@
   "name": "@phoenixreisen/gateway",
   "version": "1.0.4",
   "description": "Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.",
-  "homepage": "https://www.phoenixreisen.com",
+  "homepage": "https://design-system.phoenixreisen.com",
   "main": "./src/gateway.js",
   "scripts": {
     "minify": "npx uglifyjs ./src/gateway.min.js -o ./src/gateway.min.js",
