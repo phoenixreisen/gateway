@@ -1,6 +1,6 @@
 /**
  * Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.
- * 
+ *
  * @author Phoenix Reisen <it@phoenixreisen.com>
  * @author Fabian Marcus <f.marcus@phoenixreisen.com>
  * @copyright Phoenix Reisen GmbH
@@ -15,7 +15,7 @@
 let errorUrl = '';
 
 /**
- * Standard API-Url um einen Service 
+ * Standard API-Url um einen Service
  * mit callService anzusprechen.
  * @type {string}
  * @private
@@ -23,33 +23,10 @@ let errorUrl = '';
 let apiUrl = '';
 
 
-/** 
- * Setzt die generelle URL der API.
- * @param {string} url
- * @returns {void}
- * @public 
- */
-function setApiUrl(url) {
-    apiUrl = url;
-}
-
-/** 
- * Setzt die URL für die allgemeine
- * Errorseite bei Fehler mit Status
- * zwischen 400 und 500.
- * @param {string} url
- * @returns {void}
- * @public
- */
-function setApiErrorUrl(url) {
-    errorUrl = url;
-}
-
-
 /**
  * Bringt ein Javascript-Objekt in form data-Syntax.
  * Wird bei "callService" verwendet.
- * @param {Object} data 
+ * @param {Object} data
  * @returns {FormData}
  * @private
  */
@@ -66,13 +43,35 @@ function parseFormData(data) {
 }
 
 /**
+ * Setzt die generelle URL der API.
+ * @param {string} url
+ * @returns {void}
+ * @public
+ */
+export function setApiUrl(url) {
+    apiUrl = url;
+}
+
+/**
+ * Setzt die URL für die allgemeine
+ * Errorseite bei Fehler mit Status
+ * zwischen 400 und 500.
+ * @param {string} url
+ * @returns {void}
+ * @public
+ */
+export function setApiErrorUrl(url) {
+    errorUrl = url;
+}
+
+/**
  * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
- * @param {String} name - Name des Gatways 
- * @param {Object} params - Get/Post-Parameter 
+ * @param {String} name - Name des Gatways
+ * @param {Object} params - Get/Post-Parameter
  * @returns {Promise}
  * @public
  */
-async function callService(name, params, url=null) {
+export async function callService(name, params, url=null) {
     return m.request({
         method: 'POST',
         url: url || apiUrl,
@@ -86,8 +85,8 @@ async function callService(name, params, url=null) {
         }
         return result;
     }).catch(error => {
-        if(error && error.status 
-        && error.status >= 400 
+        if(error && error.status
+        && error.status >= 400
         && error.status <= 500) {
             location.href = errorUrl;
             return;
@@ -98,12 +97,12 @@ async function callService(name, params, url=null) {
 
 /**
  * Holt die Webtexte eines Service.
- * @param {Array} categories 
- * @param {String} key 
+ * @param {Array} categories
+ * @param {String} key
  * @returns {Promise}
- * @public 
+ * @public
  */
-async function loadWebtexte(categories, key) {
+export async function loadWebtexte(categories, key) {
     if(key) {
         try {
             const webtexte = sessionStorage.getItem(key);
@@ -116,19 +115,12 @@ async function loadWebtexte(categories, key) {
     return callService('webtexte.get-webtexte', { 'kategorien': categories })
         .then(result => {
             if(key) {
-                try { sessionStorage.setItem(key, JSON.stringify(result)); } 
+                try { sessionStorage.setItem(key, JSON.stringify(result)); }
                 catch(e) { /* nichts. */ }
             }
             return result;
         });
 }
-
-export {
-    setApiUrl,
-    setApiErrorUrl,
-    callService,
-    loadWebtexte,
-};
 
 export default {
     setApiUrl,
