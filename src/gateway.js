@@ -102,7 +102,7 @@ export async function callService(name, params, url=null) {
  * @returns {Promise}
  * @public
  */
-export async function loadWebtexte(categories, key) {
+export async function loadWebtexte(categories, key, triptypes = null) {
     if(key) {
         try {
             const webtexte = sessionStorage.getItem(key);
@@ -112,14 +112,16 @@ export async function loadWebtexte(categories, key) {
         }
         catch(e) { /* nichts */}
     }
-    return callService('webtexte.get-webtexte', { 'kategorien': categories })
-        .then(result => {
-            if(key) {
-                try { sessionStorage.setItem(key, JSON.stringify(result)); }
-                catch(e) { /* nichts. */ }
-            }
-            return result;
-        });
+    return callService('webtexte.get-webtexte', {
+        'kategorien': categories,
+        'reiseart': triptypes,
+    }).then(result => {
+        if(key) {
+            try { sessionStorage.setItem(key, JSON.stringify(result)); }
+            catch(e) { /* nichts. */ }
+        }
+        return result;
+    });
 }
 
 export default {
