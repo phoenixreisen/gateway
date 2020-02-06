@@ -103,18 +103,23 @@ export async function callService(name, params, url=null) {
  * @public
  */
 export async function loadWebtexte(categories, key, triptypes = null) {
+    const types = triptypes
+        ? !Array.isArray(triptypes)
+            ? [ triptypes ]
+            : triptypes
+        : null;
+
     if(key) {
         try {
             const webtexte = sessionStorage.getItem(key);
             if(webtexte) {
                 return Promise.resolve(JSON.parse(webtexte));
             }
-        }
-        catch(e) { /* nichts */}
+        } catch(e) { /* nichts */}
     }
     return callService('webtexte.get-webtexte', {
         'kategorien': categories,
-        'reiseart': triptypes,
+        'reiseart': types,
     }).then(result => {
         if(key) {
             try { sessionStorage.setItem(key, JSON.stringify(result)); }
