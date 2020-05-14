@@ -1,6 +1,8 @@
-src/gateway.min.js
-
 .hg/
 .git/
-tests/
+dist/
+test/
 node_modules/
+
+src/gateway.js
+src/gateway.min.js

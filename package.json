@@ -4,10 +4,11 @@
   "description": "Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.",
   "homepage": "https://design-system.phoenixreisen.net",
   "main": "./src/gateway.min.js",
-  "module": "./src/gateway.js",
+  "types": "./src/gateway.d.ts",
+  "module": "./src/gateway.ts",
   "scripts": {
-    "minify": "npx terser ./src/gateway.min.js -o ./src/gateway.min.js",
-    "compile": "npx babel ./src/gateway.js -o ./src/gateway.min.js",
+    "compile": "npx tsc ./src/gateway.ts --outDir ./src -m commonjs -t ES5",
+    "minify": "npx terser ./src/gateway.js -o ./src/gateway.min.js",
     "prepublish": "npm run compile && npm run minify"
   },
   "repository": {
@@ -26,11 +27,15 @@
     "Fabian Marcus <f.marcus@phoenixreisen.com>"
   ],
   "license": "MIT",
+  "dependencies": {
+    "mithril": "^2.0.4"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.2",
-    "@babel/plugin-transform-modules-commonjs": "^7.7.0",
-    "@babel/preset-env": "^7.7.1",
+    "del-cli": "^3.0.0",
+    "jsdom": "^16.2.2",
+    "mithril-node-render": "^3.0.0",
+    "mithril-query": "^3.1.0",
+    "ospec": "^4.0.1",
     "terser": "^4.5.0"
   }
 }

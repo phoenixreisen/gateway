@@ -15,10 +15,12 @@ npm install --save @phoenixreisen/gateway
 Modul importieren
 
 ```js
+// CommonJs
 const Gateway = require('@phoenixreisen/gateway');
 
 // oder
 
+// ESM
 import Gateway from '@phoenixreisen/gateway';
 ```
 
@@ -45,6 +47,7 @@ async getCatalog(id) {
 ## Deployment
 
 ```bash
+[npm install]                       # Abhängigkeiten installieren
 npm version [major|minor|patch]     # increase version x.x.x => major.minor.patch
 npm publish                         # upload to npm
 git push

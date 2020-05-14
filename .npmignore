@@ -1,6 +1,8 @@
 .babelrc
 .hgignore
 .gitignore
+test-setup.js
+tsconfig.json
 package-lock.json
 
 .hg/
