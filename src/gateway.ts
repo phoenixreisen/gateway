@@ -1,6 +1,3 @@
-import {ResultType, ErrorType} from './gateways';
-import m from 'mithril';
-
 /**
  * Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.
  *
@@ -8,6 +5,23 @@ import m from 'mithril';
  * @author Fabian Marcus <f.marcus@phoenixreisen.com>
  * @copyright Phoenix Reisen GmbH
  */
+import m from 'mithril';
+
+//--- Types -----
+
+export interface ResultType {
+    type: 'success' | 'failure',
+    [key: string]: any,
+}
+
+export interface ErrorType {
+    status?: number,
+    type: 'success' | 'failure',
+    ['userfriendly-message']?: string,
+    [key: string]: any,
+}
+
+//--- Variablen -----
 
 /**
  * URL auf die bei einem Fehlerhaften Statuscode
@@ -21,6 +35,7 @@ let errorUrl: string = '';
  */
 let apiUrl: string = '';
 
+//--- Funktionen -----
 
 /**
  * Bringt ein Javascript-Objekt in form data-Syntax.

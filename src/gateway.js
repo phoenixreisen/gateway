@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var mithril_1 = require("mithril");
 /**
  * Speziell auf Bedürfnisse von Phoenix Reisen zugeschnittenes/optimiertes API Modul.
  *
@@ -44,6 +43,8 @@ var mithril_1 = require("mithril");
  * @author Fabian Marcus <f.marcus@phoenixreisen.com>
  * @copyright Phoenix Reisen GmbH
  */
+var mithril_1 = require("mithril");
+//--- Variablen -----
 /**
  * URL auf die bei einem Fehlerhaften Statuscode
  * redirected wird.
@@ -54,6 +55,7 @@ var errorUrl = '';
  * mit callService anzusprechen.
  */
 var apiUrl = '';
+//--- Funktionen -----
 /**
  * Bringt ein Javascript-Objekt in form data-Syntax.
  * Wird bei "callService" verwendet.
