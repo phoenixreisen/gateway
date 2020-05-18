@@ -70,7 +70,7 @@ export function setApiErrorUrl(url: string): void {
 /**
  * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
  */
-export async function callService(name: string, params: {[key: string]: any}, url: string = null) {
+export async function callService(name: string, params: {[key: string]: any}, url: string = null): Promise<void|ResultType> {
     return m.request({
         method: 'POST',
         url: url || apiUrl,
@@ -78,18 +78,19 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             'service-name': name,
             'input-params': JSON.stringify(params),
         }),
-    }).then((result: ResultType) => {
-        if(!result || (result?.type !== 'success')) {
+    }).then((result: any) => {
+        if(!result || (result.type !== 'success')) {
             throw result;
         }
-        return result;
-    }).catch((error: ErrorType) => {
-        if(error?.status
+        return result as ResultType;
+    }).catch((error: any) => {
+        if(errorUrl
+        && error?.status
         && error.status >= 400
         && error.status <= 500) {
             location.href = errorUrl;
         } else {
-            throw error;
+            throw error as ErrorType;
         }
     });
 }
