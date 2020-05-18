@@ -1,5 +1,6 @@
 export interface ResultType {
-    type: 'success' | 'failure';
+    type?: 'success' | 'failure';
+    status?: 'success' | 'failure';
     [key: string]: any;
 }
 export interface ErrorType {
@@ -22,7 +23,7 @@ export declare function setApiErrorUrl(url: string): void;
  */
 export declare function callService(name: string, params: {
     [key: string]: any;
-}, url?: string): Promise<void | ResultType>;
+}, url?: string): Promise<ResultType>;
 /**
  * Holt die Webtexte eines Service.
  */
