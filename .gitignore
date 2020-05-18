@@ -1,8 +1,8 @@
 .hg/
 .git/
-dist/
-test/
-node_modules/
+/dist/
+/test/
+/node_modules/
 
-src/gateway.js
-src/gateway.min.js
+/src/gateway.js
+/src/gateway.min.js
