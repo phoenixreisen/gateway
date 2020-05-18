@@ -100,12 +100,14 @@ function callService(name, params, url) {
                         'input-params': JSON.stringify(params),
                     }),
                 }).then(function (result) {
-                    if (!result || ((result === null || result === void 0 ? void 0 : result.type) !== 'success')) {
+                    if (!result || (result.type !== 'success')) {
                         throw result;
                     }
                     return result;
                 }).catch(function (error) {
-                    if ((error === null || error === void 0 ? void 0 : error.status) && error.status >= 400
+                    if (errorUrl
+                        && (error === null || error === void 0 ? void 0 : error.status)
+                        && error.status >= 400
                         && error.status <= 500) {
                         location.href = errorUrl;
                     }

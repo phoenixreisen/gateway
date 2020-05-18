@@ -22,7 +22,7 @@ export declare function setApiErrorUrl(url: string): void;
  */
 export declare function callService(name: string, params: {
     [key: string]: any;
-}, url?: string): Promise<any>;
+}, url?: string): Promise<void | ResultType>;
 /**
  * Holt die Webtexte eines Service.
  */
