@@ -79,7 +79,7 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             'input-params': JSON.stringify(params),
         }),
     }).then((result: any) => {
-        if(!result || (result.type !== 'success')) {
+        if(!result || (result.type && result.type !== 'success')) {
             throw result;
         }
         return result as ResultType;

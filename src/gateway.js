@@ -100,7 +100,7 @@ function callService(name, params, url) {
                         'input-params': JSON.stringify(params),
                     }),
                 }).then(function (result) {
-                    if (!result || (result.type !== 'success')) {
+                    if (!result || (result.type && result.type !== 'success')) {
                         throw result;
                     }
                     return result;
