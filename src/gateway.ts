@@ -10,7 +10,8 @@ import m from 'mithril';
 //--- Types -----
 
 export interface ResultType {
-    type: 'success' | 'failure',
+    type?: 'success' | 'failure',
+    status?: 'success' | 'failure',
     [key: string]: any,
 }
 
@@ -70,7 +71,7 @@ export function setApiErrorUrl(url: string): void {
 /**
  * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
  */
-export async function callService(name: string, params: {[key: string]: any}, url: string = null): Promise<void|ResultType> {
+export async function callService(name: string, params: {[key: string]: any}, url: string = null): Promise<ResultType> {
     return m.request({
         method: 'POST',
         url: url || apiUrl,
@@ -79,7 +80,9 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             'input-params': JSON.stringify(params),
         }),
     }).then((result: any) => {
-        if(!result || (result.type && result.type !== 'success')) {
+        if(!result
+        || (result.type && result.type !== 'success')
+        || (result.status && result.status !== 'success')) {
             throw result;
         }
         return result as ResultType;
