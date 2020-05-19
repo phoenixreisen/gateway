@@ -7,7 +7,7 @@
   "types": "./src/gateway.d.ts",
   "module": "./src/gateway.ts",
   "scripts": {
-    "compile": "npx tsc ./src/gateway.ts --declaration --outDir ./src -m commonjs -t ES5",
+    "compile": "npx tsc ./src/gateway.ts --declaration --esModuleInterop --outDir ./src -m commonjs -t ES5",
     "minify": "npx terser ./src/gateway.js -o ./src/gateway.min.js",
     "prepublish": "npm run compile && npm run minify"
   },
@@ -31,6 +31,7 @@
     "mithril": "^2.0.4"
   },
   "devDependencies": {
+    "@types/mithril": "^2.0.3",
     "del-cli": "^3.0.0",
     "jsdom": "^16.2.2",
     "mithril-node-render": "^3.0.0",
