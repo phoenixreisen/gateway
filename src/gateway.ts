@@ -7,6 +7,7 @@
  */
 import m from 'mithril';
 
+
 //--- Types -----
 
 export interface ResultType {
@@ -17,10 +18,11 @@ export interface ResultType {
 
 export interface ErrorType {
     status?: number,
-    type: 'success' | 'failure',
-    ['userfriendly-message']?: string,
+    type?: 'failure',
+    'userfriendly-message'?: string,
     [key: string]: any,
 }
+
 
 //--- Variablen -----
 
@@ -35,6 +37,7 @@ let errorUrl: string = '';
  * mit callService anzusprechen.
  */
 let apiUrl: string = '';
+
 
 //--- Funktionen -----
 
@@ -71,7 +74,7 @@ export function setApiErrorUrl(url: string): void {
 /**
  * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
  */
-export async function callService(name: string, params: {[key: string]: any}, url: string = null): Promise<ResultType> {
+export async function callService(name: string, params: {[key: string]: any}, url: string = null): Promise<any> {
     return m.request({
         method: 'POST',
         url: url || apiUrl,
@@ -79,14 +82,14 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             'service-name': name,
             'input-params': JSON.stringify(params),
         }),
-    }).then((result: any) => {
+    }).then((result: ResultType) => {
         if(!result
         || (result.type && result.type !== 'success')
         || (result.status && result.status !== 'success')) {
             throw result;
         }
         return result as ResultType;
-    }).catch((error: any) => {
+    }).catch((error: ErrorType) => {
         if(errorUrl
         && error?.status
         && error.status >= 400
