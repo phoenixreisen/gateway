@@ -29,8 +29,8 @@ An zentraler Stelle API- & Error-Url setzen
 ```js
 // Gateway/API mit Standardurls versorgen
 
-Gateway.setApiErrorUrl(Config.urls.API_ERROR);
-Gateway.setApiUrl(`${Config.urls.GATEWAY}/call-json-service`);
+Gateway.setApiErrorUrl(/* URL zu allg. error page */);
+Gateway.setApiUrl(/* URL zu API-Endpunkt */);
 ```
 
 Daten abfragen
