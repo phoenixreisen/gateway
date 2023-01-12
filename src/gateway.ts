@@ -17,8 +17,8 @@ export type ApiResult = {
 }
 
 export type ApiError = Error & {
-    'status'?: number,
     'type'?: 'failure',
+    'status'?: string | number,
     'userfriendly-message'?: string,
     [key: string]: unknown,
 }
