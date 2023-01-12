@@ -10,17 +10,17 @@ import m from 'mithril';
 
 //--- Types -----
 
-export interface ResultType {
-    type?: 'success' | 'failure',
-    status?: 'success' | 'failure',
-    [key: string]: any,
+export type ApiResult = {
+    'type'?: 'success' | 'failure',
+    'status'?: 'success' | 'failure',
+    [key: string]: unknown,
 }
 
-export interface ErrorType {
-    status?: number,
-    type?: 'failure',
+export type ApiError = Error & {
+    'status'?: number,
+    'type'?: 'failure',
     'userfriendly-message'?: string,
-    [key: string]: any,
+    [key: string]: unknown,
 }
 
 
@@ -30,7 +30,7 @@ export interface ErrorType {
  * URL auf die bei einem Fehlerhaften Statuscode
  * redirected wird.
  */
-let errorUrl: string = '';
+let redirectUrl: string = '';
 
 /**
  * Standard API-Url um einen Service
@@ -68,33 +68,32 @@ export function setApiUrl(url: string): void {
  * bei Fehler mit Status zwischen 400 und 500.
  */
 export function setApiErrorUrl(url: string): void {
-    errorUrl = url;
+    redirectUrl = url;
 }
 
 /**
  * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
  */
-export async function callService(name: string, params: {[key: string]: any}, url?: string): Promise<ResultType|void> {
-    return m.request<ResultType>({
+export async function callService(name: string, params: {[key: string]: any}, url?: string): Promise<ApiResult | void> {
+    return m.request<ApiResult>({
         method: 'POST',
         url: url || apiUrl,
         body: parseFormData({
             'service-name': name,
             'input-params': JSON.stringify(params),
         }),
-    }).then((result: ResultType) => {
+    }).then((result: ApiResult) => {
         if(!result
         || result.type !== 'success'
         || result.status !== 'success') {
             throw result;
         }
         return result;
-    }).catch((error: ErrorType) => {
-        if(errorUrl
-        && error?.status
-        && error.status >= 400
-        && error.status <= 500) {
-            location.href = errorUrl;
+    }).catch((error: ApiError) => {
+        if(error && redirectUrl
+        && error.status
+        && error.status >= 400) {
+            location.href = redirectUrl;
         } else {
             throw error;
         }
@@ -104,7 +103,7 @@ export async function callService(name: string, params: {[key: string]: any}, ur
 /**
  * Holt die Webtexte eines Service.
  */
-export async function loadWebtexte(categories: Array<string>, key: string, triptypes: Array<string> | string = null): Promise<any> {
+export async function loadWebtexte(categories: Array<string>, key: string, triptypes: Array<string> | string | null = null): Promise<any> {
     const types = triptypes
         ? !Array.isArray(triptypes)
             ? [ triptypes ]
