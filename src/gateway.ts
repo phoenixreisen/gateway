@@ -134,7 +134,7 @@ export async function callService(name: string, params: {[key: string]: any}, ur
  * @param key Name, unter dem im SessionStorage abgespeichert werden soll
  * @param triptypes Art der Reise (See, Fluss, Orient)
  */
-export async function loadWebtexte(categories: Array<string>, key: string, triptypes?: Array<string> | string): Promise<Webtexts | void> {
+export async function loadWebtexte(categories: Array<string>, key: string, triptypes?: Array<string> | string): Promise<Webtexts> {
     const types = triptypes
         ? !Array.isArray(triptypes)
             ? [ triptypes ]
