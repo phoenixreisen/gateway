@@ -10,18 +10,29 @@ import m from 'mithril';
 
 //--- Types -----
 
+export type Webtexts = {
+    [key: string]: string
+}
+
 export type ApiResult = {
     'type'?: 'success' | 'failure',
     'status'?: 'success' | 'failure',
-    [key: string]: unknown,
+    [key: string]: any,
 }
 
-export type ApiError = Error & {
+export type ApiError = {
     'type'?: 'failure',
-    'status'?: string | number,
+    'status'?: string,
+    'details'?: string,
     'userfriendly-message'?: string,
-    [key: string]: unknown,
+    [key: string]: any,
 }
+
+export type HttpError = Error & {
+    'status': number,
+}
+
+export type Logger = (error: any) => void;
 
 
 //--- Variablen -----
@@ -37,6 +48,12 @@ let redirectUrl: string = '';
  * mit callService anzusprechen.
  */
 let apiUrl: string = '';
+
+/**
+ * Funktion zum Loggen einer Fehlermeldung
+ * z.B. Sentrys captureException()
+ */
+let logger: Logger;
 
 
 //--- Funktionen -----
@@ -72,66 +89,73 @@ export function setApiErrorUrl(url: string): void {
 }
 
 /**
- * Spricht über das Gateway einen beliebigen Service an. (Siehe WMQ-Monitor)
+ * Setzt die Logging-Funktion.
  */
-export async function callService(name: string, params: {[key: string]: any}, url?: string): Promise<ApiResult | void> {
-    return m.request<ApiResult>({
+export function setLogger(fn: Logger): void {
+    logger = fn;
+}
+
+/**
+ * Spricht über das Gateway einen beliebigen PHX Service an. 
+ * Siehe Service Monitor für Dokumentation.
+ */
+export async function callService(name: string, params: {[key: string]: any}, url?: string): Promise<unknown> {
+    if(!url && !apiUrl) {
+        throw 'API Url needs to be set as parameter oder as module variable via setApiUrl().';
+    }
+    return m.request({
         method: 'POST',
         url: url || apiUrl,
         body: parseFormData({
             'service-name': name,
             'input-params': JSON.stringify(params),
         }),
-    }).then((result: ApiResult) => {
-        if(!result
-        || result.type !== 'success'
-        || result.status !== 'success') {
-            throw result;
-        }
+    }).then((result: unknown) => {
         return result;
-    }).catch((error: ApiError) => {
-        if(error && redirectUrl
-        && error.status
-        && error.status >= 400) {
-            location.href = redirectUrl;
-        } else {
-            throw error;
+    }).catch((error: HttpError) => {
+        if(error?.status && error.status >= 400) {
+            if(logger) {
+                try {
+                    logger(error);
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+            if(redirectUrl) {
+                location.href = redirectUrl;
+            }
         }
     });
 }
 
 /**
- * Holt die Webtexte eines Service.
+ * Webtexte abfragen
+ * @param categories Liste der abzufragenden Kategorienamen
+ * @param key Name, unter dem im SessionStorage abgespeichert werden soll
+ * @param triptypes Art der Reise (See, Fluss, Orient)
  */
-export async function loadWebtexte(categories: Array<string>, key: string, triptypes: Array<string> | string | null = null): Promise<any> {
+export async function loadWebtexte(categories: Array<string>, key: string, triptypes?: Array<string> | string): Promise<Webtexts | void> {
     const types = triptypes
         ? !Array.isArray(triptypes)
             ? [ triptypes ]
             : triptypes
         : null;
 
-    if(key) {
-        try {
-            const webtexte = sessionStorage.getItem(key);
-            if(webtexte) {
-                return Promise.resolve(JSON.parse(webtexte));
-            }
-        } catch(e) {
-            /* nichts */
-        }
+    const webtexts = key ? sessionStorage.getItem(key) : null;
+    
+    if(webtexts) {
+        return Promise.resolve(JSON.parse(webtexts) as Webtexts);
     }
     return callService('webtexte.get-webtexte', {
         'kategorien': categories,
         'reiseart': types,
-    }).then(result => {
+    }).then((result) => {
+        const webtexts = result as Webtexts;
+
         if(key) {
-            try {
-                sessionStorage.setItem(key, JSON.stringify(result));
-            } catch(e) {
-                /* nichts. */
-            }
+            sessionStorage.setItem(key, JSON.stringify(webtexts));
         }
-        return result;
+        return webtexts;
     });
 }
 
