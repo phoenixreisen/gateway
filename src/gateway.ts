@@ -20,7 +20,7 @@ export type ApiResult = {
     [key: string]: any,
 }
 
-export type ApiError = {
+export type ApiError = Error & {
     'type'?: 'failure',
     'status'?: string,
     'details'?: string,
