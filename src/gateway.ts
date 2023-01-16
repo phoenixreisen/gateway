@@ -115,8 +115,12 @@ export async function callService(name: string, params: {[key: string]: any}, ur
         if(!result) {
             throw result;
         }
-        if((result as ApiResult).type !== 'success'
-        || (result as ApiResult).status !== 'success') {
+        if((result as ApiResult).type
+        && (result as ApiResult).type !== 'success') {
+            throw result;
+        }
+        if((result as ApiResult).status
+        && (result as ApiResult).status !== 'success') {
             throw result;
         }
         return result;
