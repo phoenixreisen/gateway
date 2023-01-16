@@ -24,6 +24,7 @@ export type ApiError = Error & {
     'type'?: 'failure',
     'status'?: string,
     'details'?: string,
+    'error-code'?: string,
     'userfriendly-message'?: string,
     [key: string]: any,
 }
