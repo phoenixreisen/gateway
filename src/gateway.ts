@@ -174,6 +174,7 @@ export async function loadWebtexte(categories: Array<string>, key: string, tript
 }
 
 export default {
+    setLogger,
     setApiUrl,
     setApiErrorUrl,
     callService,
