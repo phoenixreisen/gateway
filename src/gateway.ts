@@ -112,6 +112,13 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             'input-params': JSON.stringify(params),
         }),
     }).then((result: unknown) => {
+        if(!result) {
+            throw result;
+        }
+        if((result as ApiResult).type === 'failure'
+        || (result as ApiResult).status === 'failure') {
+            throw result;
+        }
         return result;
     }).catch((error: HttpError) => {
         if(error?.status && error.status >= 400) {
@@ -125,6 +132,8 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             if(redirectUrl) {
                 location.href = redirectUrl;
             }
+        } else {
+            throw error;
         }
     });
 }
