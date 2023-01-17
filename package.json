@@ -10,6 +10,7 @@
     "compile": "npx tsc ./src/gateway.ts --declaration --esModuleInterop --lib ESNext,dom --outDir ./src -m commonjs -t ES5",
     "minify": "npx terser ./src/gateway.js -o ./src/gateway.min.js",
     "preversion": "npm run compile && npm run minify",
+    "pretest": "npm run compile",
     "test": "jasmine"
   },
   "repository": {

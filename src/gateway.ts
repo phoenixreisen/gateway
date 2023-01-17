@@ -63,8 +63,11 @@ let logger: Logger;
  * Bringt ein Javascript-Objekt in form data-Syntax.
  * Wird bei "callService" verwendet.
  */
-function parseFormData(data: {[key: string]: string | number}): FormData {
-    const res = new FormData();
+export function parseFormData(data: {[key: string]: string | number}): FormData {
+    const res = (typeof FormData !== 'undefined')
+        ? new FormData() 
+        : new URLSearchParams();
+
     for(const name in data) {
         if(Object.prototype.hasOwnProperty.call(data, name)) {
             const val = data[name].toString();
@@ -136,9 +139,8 @@ export async function callService(name: string, params: {[key: string]: any}, ur
             if(redirectUrl) {
                 location.href = redirectUrl;
             }
-        } else {
-            throw error;
         }
+        throw error;
     });
 }
 
@@ -149,13 +151,17 @@ export async function callService(name: string, params: {[key: string]: any}, ur
  * @param triptypes Art der Reise (See, Fluss, Orient)
  */
 export async function loadWebtexte(categories: Array<string>, key: string, triptypes?: Array<string> | string): Promise<Webtexts> {
+    const hasSessionStore = (typeof sessionStorage !== 'undefined');
+    
     const types = triptypes
         ? !Array.isArray(triptypes)
             ? [ triptypes ]
             : triptypes
         : null;
 
-    const webtexts = key ? sessionStorage.getItem(key) : null;
+    const webtexts = (key && hasSessionStore) 
+        ? sessionStorage.getItem(key) 
+        : null;
     
     if(webtexts) {
         return Promise.resolve(JSON.parse(webtexts) as Webtexts);
@@ -166,7 +172,7 @@ export async function loadWebtexte(categories: Array<string>, key: string, tript
     }).then((result) => {
         const webtexts = result as Webtexts;
 
-        if(key) {
+        if(key && hasSessionStore) {
             sessionStorage.setItem(key, JSON.stringify(webtexts));
         }
         return webtexts;
@@ -177,6 +183,7 @@ export default {
     setLogger,
     setApiUrl,
     setApiErrorUrl,
+    parseFormData,
     callService,
     loadWebtexte,
 };
