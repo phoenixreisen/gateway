@@ -131,7 +131,8 @@ export async function callService(name: string, params: {[key: string]: any}, ur
         if(error?.status && error.status >= 400) {
             if(logger) {
                 try {
-                    logger(error);
+                    const stringified = JSON.stringify(error);
+                    logger(Error(stringified));
                 } catch(e) {
                     console.error(e);
                 }
