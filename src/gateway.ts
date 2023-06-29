@@ -63,7 +63,7 @@ let logger: Logger;
  * Bringt ein Javascript-Objekt in form data-Syntax.
  * Wird bei "callService" verwendet.
  */
-export function parseFormData(data: {[key: string]: string | number}): FormData {
+export function parseFormData(data: {[key: string]: string | number}): FormData | URLSearchParams {
     const res = (typeof FormData !== 'undefined')
         ? new FormData() 
         : new URLSearchParams();
