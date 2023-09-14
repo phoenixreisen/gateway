@@ -55,7 +55,7 @@ describe('Gateway / API handler', () => {
         const formdata = Gateway.parseFormData(params);
         const decoded = new URLSearchParams(formdata);
 
-        expect(formdata.toString()).toEqual(requestParams);
+        expect(decoded.toString()).toEqual(requestParams);
         expect(typeof formdata).toBe('object');
 
         expect(decoded.get('rechnr')).toBe('123456');
@@ -114,27 +114,26 @@ describe('Gateway / API handler', () => {
     });
 
     it('should call the API and catch server errors from it correctly', async () => {
+        const failure = {
+            status: 500,
+            message: "Server Fehler!"
+        };
+        const logger = (input) => {
+            expect(JSON.parse(input.message)).toEqual(failure);
+        };
+        
         Gateway.setApiUrl(url);
         Gateway.setApiErrorUrl(redirect);
-        Gateway.setLogger((input) => expect(input).toEqual({
-            status: 500,
-            message: 'Server Fehler!',
-        }));
+        Gateway.setLogger(logger);
 
-        const mspy = spyOn(m, 'request').and.callFake(() => Promise.reject({
-            status: 500,
-            message: 'Server Fehler!',
-        }));
+        const mspy = spyOn(m, 'request').and.callFake(() => Promise.reject(failure));
 
         await Gateway.callService('mocked-service', params, url)
             .then((result) => {
                 expect(result).toBe('I should not even be called!');
             })
             .catch((error) => {
-                expect(error).toEqual({
-                    status: 500,
-                    message: 'Server Fehler!',
-                });
+                expect(JSON.stringify(error)).toEqual(JSON.stringify(failure));
                 expect(mspy).toHaveBeenCalledTimes(1);
                 expect(global.location.href).toBe(redirect)
             });
