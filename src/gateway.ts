@@ -14,6 +14,11 @@ export type Webtexts = {
     [key: string]: string
 }
 
+export type Permission = {
+    'modul': string,
+    'aktion': string
+}
+
 export type ApiResult = {
     'type'?: 'success' | 'failure',
     'status'?: 'success' | 'failure',
@@ -180,6 +185,43 @@ export async function loadWebtexte(categories: Array<string>, key: string, tript
     });
 }
 
+export async function getPermissions(jwt: string, storageKey: string): Promise<Array<Permission>> {
+    const hasSessionStore = (typeof sessionStorage !== 'undefined');
+
+    if(!jwt || !storageKey) {
+        throw 'JWT and storageKey are required.';
+    }
+
+    const permissions = hasSessionStore
+        ? sessionStorage.getItem(storageKey)
+        : null;
+
+    if(permissions) {
+        const parsed = JSON.parse(permissions) as Array<Permission>;
+        return Promise.resolve(parsed);
+    }
+
+    const result = await callService('phxauth.get-berechtigungen', {
+        type: 'get-berechtigungen',
+        jwt: jwt,
+    }) as Array<Permission>;
+
+    if(storageKey && hasSessionStore) {
+        sessionStorage.setItem(storageKey, JSON.stringify(result));
+    }
+    return result as Array<Permission>;
+}
+
+export async function hasPermission(jwt: string, storageKey: string, permission: string): Promise<boolean> {
+    const permissions = await getPermissions(jwt, storageKey);
+    return permissions.some((perm) => {
+        if(perm?.aktion) {
+            return perm.aktion === permission;
+        }
+        return false;
+    });
+}
+
 export default {
     setLogger,
     setApiUrl,
@@ -187,4 +229,6 @@ export default {
     parseFormData,
     callService,
     loadWebtexte,
+    getPermissions,
+    hasPermission,
 };

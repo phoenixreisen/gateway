@@ -208,4 +208,73 @@ describe('Gateway / API handler', () => {
             expect(error).toBe('I should not even be called!');
         }
     });
+
+    it('should make use of sessionStorage to cache and deliver saved permissions', async () => {
+        Gateway.setApiErrorUrl(redirect);
+        Gateway.setApiUrl(url);
+
+        const result = [
+            { 'modul': 'modul-1', 'permission': 'permission-1' },
+            { 'modul': 'modul-2', 'permission': 'permission-2' },
+            { 'modul': 'modul-3', 'permission': 'permission-3' },
+            { 'modul': 'modul-4', 'permission': 'permission-4' },
+            { 'modul': 'modul-5', 'permission': 'permission-5' },
+        ];
+        const key = 'cache-test';
+        const sessionStorage = global.localStorage;
+        const mspy = spyOn(m, 'request').and.callFake(() => Promise.resolve(result));
+
+        try {
+            const perms = await Gateway.getPermissions(token, key);
+            expect(perms).toEqual(result);
+            
+            expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
+            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
+            
+            expect(JSON.parse(sessionStorage.getItem(key))).toEqual(result);
+            expect(sessionStorage.getItem(key)).toEqual(JSON.stringify(result));
+
+            mspy.calls.reset();
+            sessionStorage.getItem.calls.reset();
+            sessionStorage.setItem.calls.reset();
+
+            // Now get permissions from sessionStorage, no API call needed
+            await Gateway.getPermissions(token, key);
+            expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
+            expect(mspy).not.toHaveBeenCalled();
+            expect(sessionStorage.setItem).not.toHaveBeenCalled();
+        } catch(e) {
+            expect(error).toBe('I should not even be called!');
+        }
+    });
+
+    it('should correctly determine if a user has a permission', async () => {
+        Gateway.setApiErrorUrl(redirect);
+        Gateway.setApiUrl(url);
+
+        const result = [
+            { 'modul': 'modul-1', 'aktion': 'permission-1' },
+            { 'modul': 'modul-2', 'aktion': 'permission-2' },
+            { 'modul': 'modul-3', 'aktion': 'permission-3' },
+            { 'modul': 'modul-4', 'aktion': 'permission-4' },
+            { 'modul': 'modul-5', 'aktion': 'permission-5' },
+        ];
+        const key = 'phx-permissions';
+        const mspy = spyOn(m, 'request').and.callFake(() => Promise.resolve(result));
+        
+        try {
+            const hasPerm = await Gateway.hasPermission(token, key, 'permission-3');
+            expect(hasPerm).toBe(true);
+            expect(mspy).toHaveBeenCalledTimes(1);
+
+            const hasPerm2 = await Gateway.hasPermission(token, key, 'spermission-3');
+            expect(hasPerm2).toBe(false);
+            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
+            expect(sessionStorage.getItem).toHaveBeenCalledTimes(2);
+        } catch(e) {
+            expect(error).toBe('I should not even be called!');
+        }
+    });
 });
