@@ -185,6 +185,12 @@ export async function loadWebtexte(categories: Array<string>, key: string, tript
     });
 }
 
+/**
+ * Fragt am API die Berechtigungen eines Benutzers ab. 
+ * Die Rückgabe wird im sessionStorage gecached.
+ * @param jwt JWT des Benutzers
+ * @param storageKey Name, unter dem im SessionStorage abgespeichert werden soll
+ */
 export async function getPermissions(jwt: string, storageKey: string): Promise<Array<Permission>> {
     const hasSessionStore = (typeof sessionStorage !== 'undefined');
 
@@ -212,6 +218,12 @@ export async function getPermissions(jwt: string, storageKey: string): Promise<A
     return result as Array<Permission>;
 }
 
+/**
+ * Prüft, ob ein Benutzer eine bestimmte Berechtigung hat.
+ * @param jwt JWT des Benutzers
+ * @param storageKey Name, unter dem die Berechtigungen im sessionStorage zu finden sein könnten
+ * @param permission Bezeichnung, der zu prüfenden Berechtigung
+ */
 export async function hasPermission(jwt: string, storageKey: string, permission: string): Promise<boolean> {
     const permissions = await getPermissions(jwt, storageKey);
     return permissions.some((perm) => {
