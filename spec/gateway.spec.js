@@ -9,7 +9,7 @@ Object.assign(global, {
     location: { href: '' }
 });
 
-describe('Gateway / API handler', () => {
+describe('Gateway/API handler', () => {
 
     const token = jwt.sign({
         pwd: true,
@@ -88,9 +88,9 @@ describe('Gateway / API handler', () => {
             });
     });
 
-    it('should not enter then() and go directly to catch() instead when type is failure', () => {
+    it('should not enter then() when type is failure, instead go directly to catch()', () => {
         
-        spyOn(m, 'request').and.callFake(() => Promise.resolve({
+        const spy = spyOn(m, 'request').and.callFake(() => Promise.resolve({
             type: 'failure',
             result: {
                 job: 'Gaylord',
@@ -110,6 +110,9 @@ describe('Gateway / API handler', () => {
                         status: 'straight'
                     }
                 });
+
+                // 3 (Re-)tries should have been made
+                expect(spy).toHaveBeenCalledTimes(3);
             });
     });
 
@@ -134,12 +137,12 @@ describe('Gateway / API handler', () => {
             })
             .catch((error) => {
                 expect(JSON.stringify(error)).toEqual(JSON.stringify(failure));
-                expect(mspy).toHaveBeenCalledTimes(1);
+                expect(mspy).toHaveBeenCalledTimes(3); // 3 request (re)tries
                 expect(global.location.href).toBe(redirect)
             });
     });
 
-    it('should fetch webtexte correctly', async () => {
+    it('should fetch webtexts correctly', async () => {
         const result = {
             alarm: 'Großer Penis entdeckt!',
             style: 'Pool, Teich, See oder Meer?'
@@ -189,7 +192,7 @@ describe('Gateway / API handler', () => {
             expect(webtexts).toEqual(result);
             
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
-            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(mspy).toHaveBeenCalledTimes(3); // 3 request tries
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             
             expect(JSON.parse(sessionStorage.getItem(key))).toEqual(result);
@@ -229,7 +232,7 @@ describe('Gateway / API handler', () => {
             expect(perms).toEqual(result);
             
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
-            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(mspy).toHaveBeenCalledTimes(3); // 3 request tries
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             
             expect(JSON.parse(sessionStorage.getItem(key))).toEqual(result);
@@ -266,11 +269,11 @@ describe('Gateway / API handler', () => {
         try {
             const hasPerm = await Gateway.hasPermission(token, key, 'permission-3');
             expect(hasPerm).toBe(true);
-            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(mspy).toHaveBeenCalledTimes(3);
 
             const hasPerm2 = await Gateway.hasPermission(token, key, 'spermission-3');
             expect(hasPerm2).toBe(false);
-            expect(mspy).toHaveBeenCalledTimes(1);
+            expect(mspy).toHaveBeenCalledTimes(3);
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(2);
         } catch(e) {

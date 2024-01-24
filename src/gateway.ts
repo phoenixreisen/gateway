@@ -38,6 +38,8 @@ export type HttpError = Error & {
     'status': number,
 }
 
+export type ServiceParams = {[key: string]: any};
+
 export type Logger = (error: any) => void;
 
 
@@ -54,6 +56,11 @@ let redirectUrl: string = '';
  * mit callService anzusprechen.
  */
 let apiUrl: string = '';
+
+/**
+ * Maximale Anzahl an Fehlversuchen.
+ */
+let maxRetries: number = 3;
 
 /**
  * Funktion zum Loggen einer Fehlermeldung
@@ -98,6 +105,14 @@ export function setApiErrorUrl(url: string): void {
 }
 
 /**
+ * Überschreibt die maximale Anzahl an Fehlversuchen. (Default: 3)
+ * @param retries Maximale Anzahl an Fehlversuchen.
+ */
+export function setMaxRetries(retries: number): void {
+    maxRetries = retries;
+}
+
+/**
  * Setzt die Logging-Funktion.
  */
 export function setLogger(fn: Logger): void {
@@ -108,10 +123,24 @@ export function setLogger(fn: Logger): void {
  * Spricht über das Gateway einen beliebigen PHX Service an. 
  * Siehe Service Monitor für Dokumentation.
  */
-export async function callService(name: string, params: {[key: string]: any}, url?: string): Promise<unknown> {
+export async function callService(name: string, params: ServiceParams, url?: string): Promise<unknown> {
     if(!url && !apiUrl) {
         throw 'API Url needs to be set as parameter oder as module variable via setApiUrl().';
     }
+    return new Promise((resolve, reject) => {
+        for(let callTryNr = 1; callTryNr <= maxRetries; callTryNr+=1) {
+            requestAPI(name, params, url)
+                .then((result) => resolve(result))
+                .catch((reason) => {
+                    if(callTryNr >= maxRetries) {
+                        reject(reason);
+                    }
+                });
+        }
+    });
+}
+
+async function requestAPI(name: string, params: ServiceParams, url?: string): Promise<unknown> {
     return m.request({
         method: 'POST',
         url: url || apiUrl,
@@ -237,6 +266,7 @@ export async function hasPermission(jwt: string, storageKey: string, permission:
 export default {
     setLogger,
     setApiUrl,
+    setMaxRetries,
     setApiErrorUrl,
     parseFormData,
     callService,
