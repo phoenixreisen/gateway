@@ -88,8 +88,44 @@ describe('Gateway/API handler', () => {
             });
     });
 
-    it('should not enter then() when type is failure, instead go directly to catch()', () => {
-        
+    it('should resolve after second request retry and should throw failure from then to catch', (done) => {
+        let calls = 1;
+
+        const success = {
+            type: 'success',
+            result: {
+                job: 'Agent',
+                status: 'alamiert'
+            }
+        };
+        const fail = {
+            type: 'failure',
+            result: {
+                job: 'Gaylord',
+                status: 'straight'
+            }
+        }
+        const spy = spyOn(m, 'request').and.callFake(() => {
+            if(calls === 1) {
+                calls += 1;
+                return Promise.resolve(fail);
+            } else {
+                return Promise.resolve(success);
+            }
+        });
+
+        Gateway.callService('mocked-service', params, url)
+            .then((result) => {
+                done();
+                expect(result).toEqual(success);
+                expect(spy).toHaveBeenCalledTimes(2);
+            }).catch((error) => {
+                done();
+                expect(error).toBe('I should not even be called!');
+            });
+    });
+
+    it('should not enter then() when type is failure, instead it should go directly to catch()', (done) => {
         const spy = spyOn(m, 'request').and.callFake(() => Promise.resolve({
             type: 'failure',
             result: {
@@ -100,6 +136,7 @@ describe('Gateway/API handler', () => {
 
         Gateway.callService('mocked-service', params, url)
             .then((result) => {
+                done();
                 expect(result).toBe('I should not even be called!');
             })
             .catch((error) => {
@@ -110,7 +147,7 @@ describe('Gateway/API handler', () => {
                         status: 'straight'
                     }
                 });
-
+                done();
                 // 3 (Re-)tries should have been made
                 expect(spy).toHaveBeenCalledTimes(3);
             });
@@ -192,7 +229,7 @@ describe('Gateway/API handler', () => {
             expect(webtexts).toEqual(result);
             
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
-            expect(mspy).toHaveBeenCalledTimes(3); // 3 request tries
+            expect(mspy).toHaveBeenCalledTimes(1);
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             
             expect(JSON.parse(sessionStorage.getItem(key))).toEqual(result);
@@ -232,7 +269,7 @@ describe('Gateway/API handler', () => {
             expect(perms).toEqual(result);
             
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
-            expect(mspy).toHaveBeenCalledTimes(3); // 3 request tries
+            expect(mspy).toHaveBeenCalledTimes(1);
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             
             expect(JSON.parse(sessionStorage.getItem(key))).toEqual(result);
@@ -269,11 +306,11 @@ describe('Gateway/API handler', () => {
         try {
             const hasPerm = await Gateway.hasPermission(token, key, 'permission-3');
             expect(hasPerm).toBe(true);
-            expect(mspy).toHaveBeenCalledTimes(3);
+            expect(mspy).toHaveBeenCalledTimes(1);
 
             const hasPerm2 = await Gateway.hasPermission(token, key, 'spermission-3');
             expect(hasPerm2).toBe(false);
-            expect(mspy).toHaveBeenCalledTimes(3);
+            expect(mspy).toHaveBeenCalledTimes(1);
             expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
             expect(sessionStorage.getItem).toHaveBeenCalledTimes(2);
         } catch(e) {

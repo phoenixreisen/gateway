@@ -10,21 +10,41 @@ import m from 'mithril';
 
 //--- Types -----
 
+/**
+ * Webtexte werden gebündelt abgefragt und in einem 
+ * Objekt bestehend aus key-string-Paaren zurückgegeben.
+ */
 export type Webtexts = {
     [key: string]: string
 }
 
+/**
+ * Berechtigungen werden als Array von Objekten zurückgegeben.
+ * Eine Berechtigung besteht aus dem Namen des Moduls und der 
+ * erlaubten Aktion.
+ */
 export type Permission = {
     'modul': string,
     'aktion': string
 }
 
+/**
+ * Ein erfolgreicher Request liefert ein Objekt mit "type" "success" zurück.
+ * "status" ist deprecated. Alle weiteren Eigenschaften sind vom 
+ * aufgerufenen Service abhängig.
+ */
 export type ApiResult = {
     'type'?: 'success' | 'failure',
     'status'?: 'success' | 'failure',
     [key: string]: any,
 }
 
+/**
+ * Ein fehlerhafter Request liefert ein Objekt mit "type" "failure" zurück.
+ * "status" ist deprecated. "error-code" ist ein eindeutiger Fehlercode String.
+ * "userfriendly-message" ist eine Fehlermeldung, die dem Benutzer angezeigt werden kann.
+ * "details" ist ein Text oder Objekt mit weiteren Informationen zum Fehler.
+ */
 export type ApiError = Error & {
     'type'?: 'failure',
     'status'?: string,
@@ -34,12 +54,25 @@ export type ApiError = Error & {
     [key: string]: any,
 }
 
+/**
+ * Wenn das Backend keinen spezifischen Fehler zurückgibt,
+ * sondern ein Netzwerkfehler auftritt, wird ein HttpError
+ * zurückgegeben. Dazu erweitern wir hier den Error-Typ um
+ * die Eigenschaft "status" für einen Statuscode.
+ */
 export type HttpError = Error & {
     'status': number,
 }
 
+/**
+ * Parameter, die an einen Service übergeben werden.
+ * Die Eigenschaften sind vom aufgerufenen Service abhängig.
+ */
 export type ServiceParams = {[key: string]: any};
 
+/**
+ * Logging-Funktion, die bei einem Fehler aufgerufen wird.
+ */
 export type Logger = (error: any) => void;
 
 
@@ -74,6 +107,9 @@ let logger: Logger;
 /**
  * Bringt ein Javascript-Objekt in form data-Syntax.
  * Wird bei "callService" verwendet.
+ * @param data Objekt, das in form data-Syntax gebracht werden soll
+ * @returns FormData oder URLSearchParams
+ * @see callService()
  */
 export function parseFormData(data: {[key: string]: string | number}): FormData | URLSearchParams {
     const res = (typeof FormData !== 'undefined')
@@ -120,26 +156,53 @@ export function setLogger(fn: Logger): void {
 }
 
 /**
- * Spricht über das Gateway einen beliebigen PHX Service an. 
- * Siehe Service Monitor für Dokumentation.
+ * Spricht über das Gateway einen beliebigen PHX Service an.
+ * Es werden (je nach Einstellung von maxRetries) mehrere Requests
+ * gesendet, bis erfolglos abgebrochen wird. Das gilt auch für den Fall,
+ * dass der Request zwar durchgeht, aber vom API ein Failure-Result zurückkommt.
+ * Die Aufrufsignatur der einzelnen Services kann im Service Monitor nachgesehen werden.
+ * @param name Name des Services
+ * @param params Parameter des Services
+ * @param url URL des Services (optional)
+ * @param delay Verzögerung zwischen den Retry Requests in ms (optional, default: 1000)
+ * @param retries Maximale Anzahl an Fehlversuchen (optional, default: 3)
+ * @see https://stackoverflow.com/questions/38213668/promise-retry-design-patterns
  */
-export async function callService(name: string, params: ServiceParams, url?: string): Promise<unknown> {
+export async function callService(name: string, params: ServiceParams, url?: string, delay = 1500, retries = maxRetries): Promise<unknown> {
     if(!url && !apiUrl) {
         throw 'API Url needs to be set as parameter oder as module variable via setApiUrl().';
     }
     return new Promise((resolve, reject) => {
-        for(let callTryNr = 1; callTryNr <= maxRetries; callTryNr+=1) {
-            requestAPI(name, params, url)
-                .then((result) => resolve(result))
-                .catch((reason) => {
-                    if(callTryNr >= maxRetries) {
-                        reject(reason);
-                    }
-                });
-        }
+        let error = null;
+        const attempt = () => {
+            if(retries <= 0) {
+                reject(error);
+            } else {
+                requestAPI(name, params, url)
+                    .then(resolve)
+                    .catch((reason) => {
+                        retries -= 1;
+                        error = reason;
+                        setTimeout(() => attempt(), delay);
+                    });
+            }
+        };
+        attempt();
     });
 }
 
+
+/**
+ * Spricht über das Gateway einen beliebigen PHX Service an.
+ * Es wird nur ein Request abgesendet. Die Funktion "callService()" wrappt
+ * diese Funktion und sendet (je nach Einstellung) mehrere Requests, bis erfolglos 
+ * abgebrochen wird. Es ist also empfehlenswert, "callService()" zu verwenden.
+ * Ist im Modul ein Logger gesetzt, werden Failures in Sentry geloggt.
+ * Bei Failures mit Statuscode zwischen 400 und 500 wird auf eine allgemeine Fehlerseite geleitet.
+ * @param name Name des Services
+ * @param params Parameter des Services
+ * @param url URL des Services (optional)
+ */
 async function requestAPI(name: string, params: ServiceParams, url?: string): Promise<unknown> {
     return m.request({
         method: 'POST',
@@ -180,7 +243,7 @@ async function requestAPI(name: string, params: ServiceParams, url?: string): Pr
 }
 
 /**
- * Webtexte abfragen
+ * Webtexte abfragen und in den SessionStorage cachen.
  * @param categories Liste der abzufragenden Kategorienamen
  * @param key Name, unter dem im SessionStorage abgespeichert werden soll
  * @param triptypes Art der Reise (See, Fluss, Orient)
