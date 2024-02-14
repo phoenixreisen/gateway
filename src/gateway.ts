@@ -203,7 +203,7 @@ export async function callService(name: string, params: ServiceParams, url?: str
  * @param params Parameter des Services
  * @param url URL des Services (optional)
  */
-async function requestAPI(name: string, params: ServiceParams, url?: string): Promise<unknown> {
+export async function requestAPI(name: string, params: ServiceParams, url?: string): Promise<unknown> {
     if(!url && !apiUrl) {
         throw 'API Url needs to be set as parameter oder as module variable via setApiUrl().';
     }
